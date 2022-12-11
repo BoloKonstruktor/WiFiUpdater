@@ -12,6 +12,7 @@
 #endif
 
 #include <WiFiClient.h>
+#include <Update.h>
 
 
 	class WiFiUpdater {
@@ -19,8 +20,10 @@
 		private:
 			Stream* monitor = NULL;
 			WebServer* server = NULL;
+			void(*callback)( void ) = NULL;
 			static WiFiUpdater* int_inst;
 			String PATH = "", HTML = "", BUILD = "";
+			bool blocked = false;
 			
 			template< typename V> void print( V v ){
 					
@@ -41,6 +44,7 @@
 			WiFiUpdater( Stream* monitor = NULL );
 			void begin( const char* path = "/", WebServer* server = NULL, const uint16_t port = 80 );
 			void insertHTML( const char* html );
+			void registerStopOtherCallback( void(*callback)( void ) );
 			void setBuildDate( const char* date, const char* time );
 			void loop( void );
 	};

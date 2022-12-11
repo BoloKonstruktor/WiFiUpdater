@@ -52,7 +52,6 @@ void setup() {
   unsigned addr = 0;
   WiFiConnector* wc = new WiFiConnector;
   wc->setTimeout( 30 );
-  wc->setName( "ESP8266_AP" );
   wc->registerCallback( WCEvents );
   wc->begin( addr, NULL, 80 );
   delete wc;

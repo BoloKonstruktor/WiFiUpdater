@@ -66,7 +66,11 @@ void WiFiUpdater::begin( const char* path, WebServer* server, const uint16_t por
 						int_inst->server->sendHeader( "Connection", "close" );
 						int_inst->server->send( 200, "text/html", result );
 						delay( 1000 );
+#ifdef ESP8266
 						ESP.reset();
+#else
+						ESP.restart();
+#endif
 					} else {
 						String form = "";
 						
@@ -97,7 +101,9 @@ void WiFiUpdater::begin( const char* path, WebServer* server, const uint16_t por
 				HTTPUpload& upload = int_inst->server->upload();
       
 					if( upload.status == UPLOAD_FILE_START ){
+#ifdef ESP8266
 						WiFiUDP::stopAll();
+#endif
 						String filename = upload.filename.c_str();
 
 							if( filename.indexOf(".bin") == -1 ){
@@ -105,10 +111,18 @@ void WiFiUpdater::begin( const char* path, WebServer* server, const uint16_t por
 								int_inst->server->send( 200, "text/html", int_inst->printup( "<p>Plik nieprawidłowy</p>" ) );
 								return; 
 							}
-							
+						
+						int_inst->blocked = true;
+						
+							if( int_inst->callback ) int_inst->callback();	
+
+#ifdef ESP8266						
 						uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
         
 							if( !Update.begin( maxSketchSpace ) ) {
+#else
+							if( !Update.begin() ) {
+#endif
 							  //Update.printError(Serial);
 							}
       
@@ -141,6 +155,10 @@ void WiFiUpdater::insertHTML( const char* html ){
 	this->HTML = html;
 }
 
+void WiFiUpdater::registerStopOtherCallback( void(*callback)( void ) ){
+	this->callback = callback;
+}
+
 void WiFiUpdater::setBuildDate( const char* date, const char* time ){
 	this->BUILD = date;
 	this->BUILD += ", ";
@@ -149,5 +167,7 @@ void WiFiUpdater::setBuildDate( const char* date, const char* time ){
 
 void WiFiUpdater::loop( void ) {
 	
-		if( this->server ) this->server->handleClient();
+		if( this->server ) {
+			while( this->blocked ) this->server->handleClient();
+		}
 }
