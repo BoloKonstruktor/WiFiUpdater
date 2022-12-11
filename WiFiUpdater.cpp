@@ -94,7 +94,7 @@ void WiFiUpdater::begin( const char* path, WebServer* server, const uint16_t por
 						result = int_inst->printup( "<p>FAIL</p>" );
 					}
 					
-				int_inst->Redirect( result, "?rst=1" );
+				int_inst->Redirect( result, "?rst" );
 				int_inst->server->sendHeader( "Connection", "close" );
 				int_inst->server->send( 200, "text/html", result );
 			}, []() {
