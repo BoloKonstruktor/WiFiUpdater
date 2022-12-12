@@ -15,6 +15,7 @@ WiFiUpdater					KEYWORD1
 insertHTML					KEYWORD2
 registerStopOtherCallback	KEYWORD2
 setBuildDate				KEYWORD2
+setBuildName				KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

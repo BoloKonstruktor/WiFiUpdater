@@ -22,8 +22,8 @@
 			WebServer* server = NULL;
 			void(*callback)( void ) = NULL;
 			static WiFiUpdater* int_inst;
-			String PATH = "", HTML = "", BUILD = "";
-			bool blocked = false;
+			String PATH = "", HTML = "", BUILD_DATE = "", BUILD_NAME = "";
+			bool ext_server_inst = false, blocked = false;
 			
 			template< typename V> void print( V v ){
 					
@@ -37,6 +37,7 @@
 				this->print( "\n" );
 			}
 			
+			String printfr( const char* action = "" );
 			String printup( const char* form );
 			void Redirect( String& str, const char* query = "", uint16_t t = 1000 );
 			
@@ -46,6 +47,7 @@
 			void insertHTML( const char* html );
 			void registerStopOtherCallback( void(*callback)( void ) );
 			void setBuildDate( const char* date, const char* time );
+			void setBuildName( const char* name );
 			void loop( void );
 	};
 

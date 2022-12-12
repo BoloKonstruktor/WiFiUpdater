@@ -57,6 +57,7 @@ void setup() {
   delete wc;
   wc = NULL;
 
+  updater.setBuildName( __FILE__ );
   updater.setBuildDate( __DATE__, __TIME__ );
   updater.insertHTML( HTML );
   updater.begin();

@@ -2,7 +2,7 @@
 
 
 const char* UploadForm = {
-	"<form method='POST' action='/updated' enctype='multipart/form-data'>"
+	"<form method='POST' action='%ACTION%' enctype='multipart/form-data'>"
 	"<input type='file' accept='application/octet-stream,.bin' name='update'>"
 	"<input type='submit' value='Update'>"
 	"</form>"	
@@ -16,9 +16,17 @@ const char* RedirectScript = {
 	"</script>"	
 };
 
+const char* UpdateEndPath = "/updated";
+
 WiFiUpdater* WiFiUpdater::int_inst = NULL;
 
 //Metody prywatne
+String WiFiUpdater::printfr( const char* action ){
+	String form = UploadForm;
+	form.replace( "%ACTION%", action );
+	return form;
+}
+
 String WiFiUpdater::printup( const char* form ){
 	
 	String html = this->HTML;
@@ -50,9 +58,11 @@ void WiFiUpdater::begin( const char* path, WebServer* server, const uint16_t por
 				
 				if( server ){
 					this->server = server;
+					this->ext_server_inst = true;
 				} else {
 					this->server = new WebServer( port );
 					this->server->begin();
+					this->ext_server_inst = false;
 				}
 			
 			this->println( "[WifiUpdater] Ready" );
@@ -74,19 +84,25 @@ void WiFiUpdater::begin( const char* path, WebServer* server, const uint16_t por
 					} else {
 						String form = "";
 						
-							if( int_inst->BUILD != "" ){
+							if( int_inst->BUILD_NAME != "" ){
+								form += "<h3>";
+								form += int_inst->BUILD_NAME;
+								form += "</h3>";
+							}
+						
+							if( int_inst->BUILD_DATE != "" ){
 								form += "<p>Build: ";
-								form += int_inst->BUILD;
+								form += int_inst->BUILD_DATE;
 								form += "</p>";
 							}
 							
-						form += UploadForm;
+						form += int_inst->printfr( UpdateEndPath );
 						int_inst->server->sendHeader( "Connection", "close" );
 						int_inst->server->send( 200, "text/html", int_inst->printup( form.c_str() ) );
 					}
 			});
 			
-			this->server->on( "/updated", HTTP_POST, [](){
+			this->server->on( UpdateEndPath, HTTP_POST, [](){
 				bool error = Update.hasError();
 				String result = int_inst->printup( "<p>OK</p>" );
 				
@@ -105,13 +121,24 @@ void WiFiUpdater::begin( const char* path, WebServer* server, const uint16_t por
 						WiFiUDP::stopAll();
 #endif
 						String filename = upload.filename.c_str();
+						String errstr = "";
+						bool error = false;
 
 							if( filename.indexOf(".bin") == -1 ){
-								String errstr = int_inst->printup( ((filename == "") ? "<p>Wybierz plik!</p>" : "<p>Plik nieprawidłowy!</p>") );
+								errstr = int_inst->printup( ((filename == "") ? "<p>Wybierz plik!</p>" : "<p>Plik nieprawidłowy!</p>") );
+								error = true;
+							}
+							
+							if( filename != "" && int_inst->BUILD_NAME != "" && filename.indexOf( int_inst->BUILD_NAME ) == -1 ){
+								errstr = int_inst->printup( "<p>Plik nieprawidłowy!</p>" );
+								error = true;
+							}
+							
+							if( error ){
 								int_inst->Redirect( errstr, "", 1000 );
 								int_inst->server->sendHeader( "Connection", "close" );
 								int_inst->server->send( 200, "text/html", errstr );
-								return; 
+								return; 	
 							}
 						
 						int_inst->blocked = true;
@@ -162,14 +189,50 @@ void WiFiUpdater::registerStopOtherCallback( void(*callback)( void ) ){
 }
 
 void WiFiUpdater::setBuildDate( const char* date, const char* time ){
-	this->BUILD = date;
-	this->BUILD += ", ";
-	this->BUILD += time;
+	this->BUILD_DATE = date;
+	this->BUILD_DATE += ", ";
+	this->BUILD_DATE += time;
+}
+
+void WiFiUpdater::setBuildName( const char* name ){
+	this->BUILD_NAME = name;
+	uint8_t len = this->BUILD_NAME.length();
+	uint8_t i = len-1;
+	uint8_t p = 0;
+		
+		while( i ){
+				
+				if( this->BUILD_NAME[i] == '\\' ) {
+					p = i;
+					break;
+				}
+			
+			i--;
+		}
+		
+	this->BUILD_NAME = this->BUILD_NAME.substring( p+1 );
+	len = this->BUILD_NAME.length();
+	i = len-1;
+	p = 0;
+	
+		while( i ){
+				
+				if( this->BUILD_NAME[i] == '.' ) {
+					p = i;
+					break;
+				}
+			
+			i--;
+		}
+		
+	this->BUILD_NAME = this->BUILD_NAME.substring( 0, p );
 }
 
 void WiFiUpdater::loop( void ) {
 	
 		if( this->server ) {
 			while( this->blocked ) this->server->handleClient();
+			
+			if( !this->ext_server_inst ) this->server->handleClient();
 		}
 }
