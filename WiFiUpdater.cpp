@@ -107,7 +107,7 @@ void WiFiUpdater::begin( const char* path, WebServer* server, const uint16_t por
 						String filename = upload.filename.c_str();
 
 							if( filename.indexOf(".bin") == -1 ){
-								String errstr = int_inst->printup( "<p>Plik nieprawidłowy!</p>" );
+								String errstr = int_inst->printup( ((filename == "") ? "<p>Wybierz plik!</p>" : "<p>Plik nieprawidłowy!</p>") );
 								int_inst->Redirect( errstr, "", 1000 );
 								int_inst->server->sendHeader( "Connection", "close" );
 								int_inst->server->send( 200, "text/html", errstr );

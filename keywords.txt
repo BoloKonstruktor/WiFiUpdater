@@ -6,14 +6,15 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-WiFiUpdater			KEYWORD1
+WiFiUpdater					KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
 
-insertHTML			KEYWORD2
-setBuildDate		KEYWORD2
+insertHTML					KEYWORD2
+registerStopOtherCallback	KEYWORD2
+setBuildDate				KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
