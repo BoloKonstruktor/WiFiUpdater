@@ -2,10 +2,45 @@
 
 
 const char* UploadForm = {
-	"<form method='POST' action='%ACTION%' enctype='multipart/form-data'>"
-	"<input type='file' accept='application/octet-stream,.bin' name='update'>"
-	"<input type='submit' value='Update'>"
-	"</form>"	
+	"<form method='POST' enctype='multipart/form-data'>"
+	"<input type='file' accept='application/octet-stream,.bin' name='f' id='f'>"
+	"<input type='button' value='Update' onclick='uF();'>"
+	"</form>"
+	"<progress id='pB' value='0' max='100' style='width:300px;margin:auto;display:none;'></progress>"
+	"<h3 id='st'></h3>"
+	"<script type='text/javascript'>"
+	"function _(el){return document.getElementById(el);}"
+	"function uF(){"
+	"var file=_('f').files[0];"
+	"var frd=new FormData();"
+	"frd.append('f',file);"
+	"var ajax=new XMLHttpRequest();"
+	"ajax.upload.addEventListener('progress',pH,false);"
+	"ajax.addEventListener('load',cH,false);"
+	"ajax.addEventListener('error',eH,false);"
+	"ajax.addEventListener('abort',aH,false);"
+	"ajax.open('POST','%ACTION%');"
+	"ajax.send(frd);"
+	"}"
+	"function pH(event){"
+	"var p=(event.loaded/event.total)*100;"
+	"_('pB').style.display='block';"
+	"_('pB').value=Math.round(p);"
+	"_('st').innerHTML=Math.round(p)+'%';"
+	"} "
+	"function cH(event){"
+	"_('st').innerHTML=event.target.responseText;"
+	"_('pB').style.display='none';"
+	"_('pB').value=0;"
+	"setTimeout(function(){location.href='/update?rst=1';},1000);"
+	"} "
+	"function eH(event){"
+	"_('st').innerHTML='Upload Failed';"
+	"} "
+	"function aH(event){"
+	"_('st').innerHTML='Upload Aborted';"
+	"}"
+	"</script>"	
 };
 
 const char* RedirectScript = {
@@ -104,13 +139,12 @@ void WiFiUpdater::begin( const char* path, WebServer* server, const uint16_t por
 			
 			this->server->on( UpdateEndPath, HTTP_POST, [](){
 				bool error = Update.hasError();
-				String result = int_inst->printup( "<p>OK</p>" );
+				String result = "<p>Update OK!</p>";
 				
 					if( error ){
-						result = int_inst->printup( "<p>FAIL</p>" );
+						result = "<p>Update FAIL!</p>";
 					}
-					
-				int_inst->Redirect( result, "?rst=1" );
+
 				int_inst->server->sendHeader( "Connection", "close" );
 				int_inst->server->send( 200, "text/html", result );
 			}, []() {
