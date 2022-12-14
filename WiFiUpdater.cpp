@@ -3,41 +3,54 @@
 
 const char* UploadForm = {
 	"<form method='POST' enctype='multipart/form-data'>"
-	"<input type='file' accept='application/octet-stream,.bin' name='f' id='f'>"
-	"<input type='button' value='Update' onclick='uF();'>"
+	"<input type='file' accept='application/octet-stream,.bin' name='f' id='f' required />"
+	"<input type='button' id='up' value='Update'>"
 	"</form>"
-	"<progress id='pB' value='0' max='100' style='width:300px;margin:auto;display:none;'></progress>"
+	"<progress id='pB' value='0' max='100' style='width:80%;margin:auto;display:none;'></progress>"
 	"<h3 id='st'></h3>"
 	"<script type='text/javascript'>"
+	"const form=document.getElementById('up');"
+	"form.addEventListener('click',chk);"
+	"function chk(){"
+	"var f=_('f').files[0];"
+	"if(f.name.indexOf('%BN%')==-1)_('st').innerHTML='Invalid file!';"	
+	"else gM(f,uF);"
+	"}"
+	"function gM(f,c){"
+	"var r=new FileReader();"
+	"r.onloadend=function(e){"
+	"if(e.target.readyState===FileReader.DONE){"
+	"var a=(new Uint8Array(e.target.result)).subarray(0,4);"
+	"var h='';"
+	"for(var i=0;i<a.length;i++){h+=a[i].toString(16);}"
+	"c(f,h);}};r.readAsArrayBuffer(f);}"
 	"function _(el){return document.getElementById(el);}"
-	"function uF(){"
-	"var file=_('f').files[0];"
-	"var frd=new FormData();"
-	"frd.append('f',file);"
+	"function uF(f,m){"
+	"if(m!='e9622f'){_('st').innerHTML='Invalid file!';"	
+	"}else{var frd=new FormData();"
+	"frd.append('f',f);"
 	"var ajax=new XMLHttpRequest();"
 	"ajax.upload.addEventListener('progress',pH,false);"
 	"ajax.addEventListener('load',cH,false);"
 	"ajax.addEventListener('error',eH,false);"
 	"ajax.addEventListener('abort',aH,false);"
 	"ajax.open('POST','%ACTION%');"
-	"ajax.send(frd);"
-	"}"
-	"function pH(event){"
+	"ajax.send(frd);}"
+	"}function pH(event){"
 	"var p=(event.loaded/event.total)*100;"
 	"_('pB').style.display='block';"
 	"_('pB').value=Math.round(p);"
-	"_('st').innerHTML=Math.round(p)+'%';"
-	"} "
-	"function cH(event){"
+	"var ps=Math.round(p)+'%';"
+	"if(p==100)ps='Updating ...';"
+	"_('st').innerHTML=ps;"
+	"}function cH(event){"
 	"_('st').innerHTML=event.target.responseText;"
 	"_('pB').style.display='none';"
 	"_('pB').value=0;"
-	"setTimeout(function(){location.href='/update?rst=1';},1000);"
-	"} "
-	"function eH(event){"
+	"setTimeout(function(){location.href='/update?rst=1';},1500);"
+	"}function eH(event){"
 	"_('st').innerHTML='Upload Failed';"
-	"} "
-	"function aH(event){"
+	"}function aH(event){"
 	"_('st').innerHTML='Upload Aborted';"
 	"}"
 	"</script>"	
@@ -59,6 +72,7 @@ WiFiUpdater* WiFiUpdater::int_inst = NULL;
 String WiFiUpdater::printfr( const char* action ){
 	String form = UploadForm;
 	form.replace( "%ACTION%", action );
+	form.replace( "%BN%", this->BUILD_NAME );
 	return form;
 }
 
@@ -158,18 +172,13 @@ void WiFiUpdater::begin( const char* path, WebServer* server, const uint16_t por
 						String errstr = "";
 						bool error = false;
 
-							if( filename.indexOf(".bin") == -1 ){
-								errstr = int_inst->printup( ((filename == "") ? "<p>Wybierz plik!</p>" : "<p>Plik nieprawidłowy!</p>") );
-								error = true;
-							}
-							
-							if( filename != "" && int_inst->BUILD_NAME != "" && filename.indexOf( int_inst->BUILD_NAME ) == -1 ){
+							if( filename.indexOf(".bin") == -1 || int_inst->BUILD_NAME != "" && filename.indexOf( int_inst->BUILD_NAME ) == -1 ){
 								errstr = int_inst->printup( "<p>Plik nieprawidłowy!</p>" );
 								error = true;
 							}
 							
 							if( error ){
-								int_inst->Redirect( errstr, "", 1000 );
+								//int_inst->Redirect( errstr, "", 1000 );
 								int_inst->server->sendHeader( "Connection", "close" );
 								int_inst->server->send( 200, "text/html", errstr );
 								return; 	
