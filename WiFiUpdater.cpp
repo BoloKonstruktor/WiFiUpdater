@@ -4,13 +4,11 @@
 const char* UploadForm = {
 	"<form method='POST' enctype='multipart/form-data'>"
 	"<input type='file' accept='application/octet-stream,.bin' name='f' id='f' required />"
-	"<input type='button' id='up' value='Update'>"
+	"<input type='button' value='Update' onclick='chk();'>"
 	"</form>"
 	"<progress id='pB' value='0' max='100' style='width:80%;margin:auto;display:none;'></progress>"
 	"<h3 id='st'></h3>"
 	"<script type='text/javascript'>"
-	"const form=document.getElementById('up');"
-	"form.addEventListener('click',chk);"
 	"function chk(){"
 	"var f=_('f').files[0];"
 	"if(f.name.indexOf('%BN%')==-1)_('st').innerHTML='Invalid file!';"	
@@ -34,7 +32,7 @@ const char* UploadForm = {
 	"ajax.addEventListener('load',cH,false);"
 	"ajax.addEventListener('error',eH,false);"
 	"ajax.addEventListener('abort',aH,false);"
-	"ajax.open('POST','%ACTION%');"
+	"ajax.open('POST','%ACT%');"
 	"ajax.send(frd);}"
 	"}function pH(event){"
 	"var p=(event.loaded/event.total)*100;"
@@ -71,7 +69,7 @@ WiFiUpdater* WiFiUpdater::int_inst = NULL;
 //Metody prywatne
 String WiFiUpdater::printfr( const char* action ){
 	String form = UploadForm;
-	form.replace( "%ACTION%", action );
+	form.replace( "%ACT%", action );
 	form.replace( "%BN%", this->BUILD_NAME );
 	return form;
 }
