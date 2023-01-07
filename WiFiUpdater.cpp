@@ -194,21 +194,22 @@ void WiFiUpdater::begin( const char* path, WebServer* server, const uint16_t por
 #else
 							if( !Update.begin() ) {
 #endif
-							  //Update.printError(Serial);
+								if( int_inst->monitor ) Update.printError( *int_inst->monitor );
 							}
       
 					} else if( upload.status == UPLOAD_FILE_WRITE ){
 							
 							if( Update.write( upload.buf, upload.currentSize ) != upload.currentSize ){
-							  //Update.printError(Serial);
+
+								if( int_inst->monitor ) Update.printError( *int_inst->monitor );
 							}
 							
 					} else if( upload.status == UPLOAD_FILE_END ) {
 						
 							if( Update.end( true ) ){ //true to set the size to the current progress
-								//Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
+								if( int_inst->monitor ) int_inst->monitor->printf( "Update Success: %u\nRebooting...\n", upload.totalSize );
 							} else {
-								//Update.printError(Serial);
+								if( int_inst->monitor ) Update.printError( *int_inst->monitor );
 							}
 					
 						//Serial.setDebugOutput( false );
