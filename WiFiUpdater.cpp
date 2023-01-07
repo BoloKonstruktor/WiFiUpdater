@@ -4,7 +4,7 @@
 const char* UploadForm = {
 	"<form method='POST' enctype='multipart/form-data'>"
 	"<input type='file' accept='application/octet-stream,.bin' name='f' id='f' required />"
-	"<input type='button' value='Update' onclick='chk();'>"
+	"<input type='button' value='Update' onclick='chk();' style='border:1px solid #999;background-image:linear-gradient(#eee,#bbb);'/>"
 	"</form>"
 	"<p><progress id='pB' value='0' max='100' style='width:80%;margin:auto;display:none;'></progress></p>"
 	"<h3 id='st'></h3>"
@@ -45,11 +45,11 @@ const char* UploadForm = {
 	"_('st').innerHTML=event.target.responseText;"
 	"_('pB').style.display='none';"
 	"_('pB').value=0;"
-	"setTimeout(function(){location.href='/update?rst=1';},1500);"
+	"setTimeout(function(){location.href='%PATH%?rst=1';},1500);"
 	"}function eH(event){"
-	"_('st').innerHTML='Upload Failed';"
+	"_('st').innerHTML='Upload Failed!';"
 	"}function aH(event){"
-	"_('st').innerHTML='Upload Aborted';"
+	"_('st').innerHTML='Upload Aborted!';"
 	"}"
 	"</script>"	
 };
@@ -71,6 +71,7 @@ String WiFiUpdater::printfr( const char* action ){
 	String form = UploadForm;
 	form.replace( "%ACT%", action );
 	form.replace( "%BN%", this->BUILD_NAME );
+	form.replace( "%PATH%", this->PATH );
 	return form;
 }
 
@@ -119,7 +120,7 @@ void WiFiUpdater::begin( const char* path, WebServer* server, const uint16_t por
 					
 					if( int_inst->server->hasArg( "rst" ) ){
 						String result = int_inst->printup( "<p>Restart ...</p>" );
-						int_inst->Redirect( result, "", 5000 );
+						int_inst->Redirect( result, "", 10000 );
 						int_inst->server->sendHeader( "Connection", "close" );
 						int_inst->server->send( 200, "text/html", result );
 						delay( 1000 );
@@ -132,7 +133,7 @@ void WiFiUpdater::begin( const char* path, WebServer* server, const uint16_t por
 						String form = "";
 						
 							if( int_inst->BUILD_NAME != "" ){
-								form += "<h3>";
+								form += "<h3 style='text-shadow:1px 1px 1px #FFF;letter-spacing:2px;'>";
 								form += int_inst->BUILD_NAME;
 								form += "</h3>";
 							}
