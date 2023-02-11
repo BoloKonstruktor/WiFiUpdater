@@ -24,7 +24,7 @@ const char* UploadForm = {
 	"c(f,h);}};r.readAsArrayBuffer(f);}"
 	"function _(el){return document.getElementById(el);}"
 	"function uF(f,m){"
-	"if(m!='e9622f'){_('st').innerHTML='Invalid file!';"	
+	"if(m!='e9622f'){_('st').innerHTML='Invalid file! ('+m+')';"	
 	"}else{var frd=new FormData();"
 	"frd.append('f',f);"
 	"var ax=new XMLHttpRequest();"
@@ -253,7 +253,9 @@ void WiFiUpdater::setBuildName( const char* name ){
 			i--;
 		}
 		
-	this->BUILD_NAME = this->BUILD_NAME.substring( p+1 );
+		if( p ) p += 1;
+		
+	this->BUILD_NAME = this->BUILD_NAME.substring( p );
 	len = this->BUILD_NAME.length();
 	i = len-1;
 	p = 0;

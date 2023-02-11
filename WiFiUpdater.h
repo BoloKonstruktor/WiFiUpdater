@@ -8,11 +8,11 @@
 #else
 #include <WiFi.h>
 #include <WebServer.h>
-#include <ESPmDNS.h>	
+#include <ESPmDNS.h>
+#include <Update.h>	
 #endif
 
 #include <WiFiClient.h>
-#include <Update.h>
 
 
 	class WiFiUpdater {
