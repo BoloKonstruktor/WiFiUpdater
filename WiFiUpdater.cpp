@@ -1,5 +1,8 @@
 #include "WiFiUpdater.h"
 
+const char* BIN_MIMIE = "e9622f,e92320,e9232f";
+
+
 
 const char* UploadForm = {
 	"<form method='POST' enctype='multipart/form-data'>"
@@ -14,6 +17,14 @@ const char* UploadForm = {
 	"if(f.name.indexOf('%BN%')==-1)_('st').innerHTML='Invalid file!';"	
 	"else gM(f,uF);"
 	"}"
+	"function cM(m){"
+	"var bm='%BM%';"
+	"bm=bm.split(',');"
+	"for(var i=0;i<bm.length;i++){"
+	"if(m==bm[i])return 1;"
+	"}"
+	"return 0;"
+	"}"
 	"function gM(f,c){"
 	"var r=new FileReader();"
 	"r.onloadend=function(e){"
@@ -24,7 +35,7 @@ const char* UploadForm = {
 	"c(f,h);}};r.readAsArrayBuffer(f);}"
 	"function _(el){return document.getElementById(el);}"
 	"function uF(f,m){"
-	"if(m!='e9622f'){_('st').innerHTML='Invalid file! ('+m+')';"	
+	"if(!cM(m)){_('st').innerHTML='Invalid file! ('+m+')';"	
 	"}else{var frd=new FormData();"
 	"frd.append('f',f);"
 	"var ax=new XMLHttpRequest();"
@@ -71,6 +82,7 @@ String WiFiUpdater::printfr( const char* action ){
 	String form = UploadForm;
 	form.replace( "%ACT%", action );
 	form.replace( "%BN%", this->BUILD_NAME );
+	form.replace( "%BM%", String( BIN_MIMIE ) );
 	form.replace( "%PATH%", this->PATH );
 	return form;
 }
