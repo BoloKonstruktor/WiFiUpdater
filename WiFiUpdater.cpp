@@ -183,7 +183,7 @@ void WiFiUpdater::begin( const char* path, WebServer* server, const uint16_t por
 						String errstr = "";
 						bool error = false;
 
-							if( filename.indexOf(".bin") == -1 || int_inst->BUILD_NAME != "" && filename.indexOf( int_inst->BUILD_NAME ) == -1 ){
+							if( filename.indexOf(".bin") == -1 || ( int_inst->BUILD_NAME != "" && filename.indexOf( int_inst->BUILD_NAME ) == -1 ) ){
 								errstr = int_inst->printup( "<p>Invalid file!</p>" );
 								error = true;
 							}

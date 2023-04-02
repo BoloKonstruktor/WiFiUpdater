@@ -62,7 +62,7 @@ void setup() {
 
   updater.setBuildName( __FILE__ );
   updater.setBuildDate( __DATE__, __TIME__ );
-  updater.insertHTML( HTML );
+  updater.insertHTML( UPDATER_HTML );
   updater.begin();
 }
 
